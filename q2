@@ -1,0 +1,145 @@
+#include <iostream>
+#include <string>
+using namespace std;
+// Product Class
+class Product {
+private:
+    int productId;
+    string productName;
+    double price;
+public:
+    // Constructor
+    Product(int id, const std::string& name, double p) : productId(id), productName(name), price(p) {}
+    // Display product details
+    void displayDetails() const {
+        cout << "Product ID: " << productId << ", Name: " << productName << ", Price: $" << price << endl;
+    }
+    // Getter for product price
+    double getPrice() const {
+        return price;
+    }
+};
+// ShoppingCart Class
+class ShoppingCart {
+private:
+    Product** products;  // Dynamic array of products
+    int capacity;        // Capacity of the array
+    int count;           // Number of products in the cart
+
+public:
+    // Constructor
+    ShoppingCart(int cap) : capacity(cap), count(0) {
+        products = new Product*[capacity];
+    }
+    // Destructor
+    ~ShoppingCart() {
+        for (int i = 0; i < count; ++i) {
+            delete products[i];
+        }
+        delete[] products;
+    }
+    // Add a product to the cart
+    void addProduct(Product* product) {
+        if (count < capacity) {
+            products[count++] = product;
+        } else {
+           cout << "Shopping cart is full. Cannot add more products." << endl;
+        }
+    }
+    // Display all products in the cart
+    void displayProducts() const {
+        cout << "Products in the cart:" << endl;
+        for (int i = 0; i < count; ++i) {
+            products[i]->displayDetails();
+        }
+    }
+    // Calculate total cost of products in the cart
+    double calculateTotalCost() const {
+        double total = 0.0;
+        for (int i = 0; i < count; ++i) {
+            total += products[i]->getPrice();
+        }
+        return total;
+    }
+};
+// User Class
+class User {
+private:
+    int userId;
+    ShoppingCart* cart;  // Association with ShoppingCart
+public:
+    // Constructor
+    User(int id) : userId(id), cart(nullptr) {}
+    // Destructor
+    ~User() {
+        delete cart;  // ShoppingCart is part of the User (Composition)
+    }
+    // Display user details
+    void displayDetails() const {
+        cout << "User ID: " << userId << endl;
+        if (cart) {
+            cout << "User has a shopping cart." << endl;
+        } else {
+            cout << "User does not have a shopping cart." << endl;
+        }
+    }
+    // Create a shopping cart for the user (Aggregation)
+    void createShoppingCart(int capacity) {
+        if (!cart) {
+            cart = new ShoppingCart(capacity);
+        } else {
+            cout << "User already has a shopping cart." << endl;
+        }
+    }
+    // Add a product to the user's shopping cart
+    void addToCart(Product* product) {
+        if (cart) {
+            cart->addProduct(product);
+        } else {
+            cout << "User does not have a shopping cart. Cannot add product." << endl;
+        }
+    }
+    // Display products in the user's shopping cart
+    void displayCart() const {
+        if (cart) {
+            cart->displayProducts();
+        } else {
+            cout << "User does not have a shopping cart." << endl;
+        }
+    }
+    // Display total cost of products in the user's shopping cart
+    void displayTotalCost() const {
+        if (cart) {
+            cout << "Total cost in the cart: $" << cart->calculateTotalCost() << endl;
+        } else {
+          cout << "User does not have a shopping cart." << endl;
+        }
+    }
+};
+int main() {
+    // Create products
+    Product* laptop = new Product(1, "Laptop", 999.99);
+    Product* phone = new Product(2, "Smartphone", 499.99);
+    Product* headphones = new Product(3, "Headphones", 79.99);
+    // Create users
+    User user1(101);
+    User user2(102);
+    user1.createShoppingCart(5);
+    user2.createShoppingCart(3);
+    user1.addToCart(laptop);
+    user1.addToCart(phone);
+    user2.addToCart(headphones);
+    // Display user details
+    user1.displayDetails();
+    user2.displayDetails();
+    // Display products in the shopping carts
+    user1.displayCart();
+    user2.displayCart();
+    // Display total cost of products in the shopping carts
+    user1.displayTotalCost();
+    user2.displayTotalCost();
+    delete laptop;
+    delete phone;
+    delete headphones;
+    return 0;
+}
